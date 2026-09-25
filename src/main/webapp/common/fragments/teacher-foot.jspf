@@ -1,0 +1,64 @@
+        </main>
+    </div>
+</div>
+
+<%-- Same flash-message gap-fix as admin-foot.jspf's own comment explains in full - MarksImportServlet's own authorization/exam-state failures (Phase 13) redirect through sessionScope.flashError, which nothing was rendering before this existed. --%>
+<c:if test="${not empty sessionScope.flashSuccess}">
+    <div id="flashSuccessData" data-message="<c:out value='${sessionScope.flashSuccess}'/>" style="display:none;"></div>
+    <c:remove var="flashSuccess" scope="session"/>
+</c:if>
+<c:if test="${not empty sessionScope.flashError}">
+    <div id="flashErrorData" data-message="<c:out value='${sessionScope.flashError}'/>" style="display:none;"></div>
+    <c:remove var="flashError" scope="session"/>
+</c:if>
+
+<%-- Same CDN set as admin-foot.jspf, deliberately kept as a separate file
+     rather than sharing/renaming that one: admin-foot.jspf is <%@ include
+     %>d directly by 26 existing admin JSPs (a literal per-file path, not an
+     indirection any rename could apply once), so consolidating it would
+     mean touching every one of them for a pure naming nicety - a real risk
+     to already-verified files for no functional gain. app-shell.css was a
+     different, lower-risk call: exactly one file (admin-head.jspf)
+     referenced it by name. Content is identical today because both roles
+     need the same libraries today; that's convergence, not the two roles
+     being forced to share one file, and either can diverge without
+     touching the other. --%>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.8/js/dataTables.responsive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/js/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.8/css/responsive.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/css/toastr.min.css">
+
+<script>
+  $.fn.dataTable.defaults.responsive = true;
+
+  document.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) { return; }
+    var submitBtn = e.target.querySelector('button[type="submit"]:not([disabled])');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Processing\u2026';
+    }
+  });
+
+  function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var isOpen = sidebar.classList.toggle('open');
+    var btn = document.querySelector('.mobile-menu-btn');
+    if (btn) { btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); }
+  }
+
+  (function () {
+    var successEl = document.getElementById('flashSuccessData');
+    if (successEl) { toastr.success(successEl.dataset.message); }
+    var errorEl = document.getElementById('flashErrorData');
+    if (errorEl) { toastr.error(errorEl.dataset.message); }
+  })();
+</script>
+</body>
+</html>

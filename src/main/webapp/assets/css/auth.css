@@ -1,0 +1,276 @@
+/* Layout: split screen on desktop/tablet, brand panel collapses to a
+   compact header on narrow viewports so the form - the page's actual job -
+   stays the priority on mobile. */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  background: var(--color-paper);
+}
+
+.auth-brand {
+  flex: 0 0 42%;
+  position: relative;
+  background: var(--color-ink);
+  color: var(--color-paper-soft);
+  padding: var(--space-12) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+/* The grade-grid texture: faint tabulated rows/columns evoking a mark
+   sheet, not decoration for its own sake - kept at low opacity so it reads
+   as texture, not pattern, from a normal viewing distance. */
+.auth-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(to bottom, var(--color-rule-dark) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to right, var(--color-rule-dark) 0 1px, transparent 1px 96px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.auth-wordmark {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.auth-wordmark span {
+  color: var(--color-seal-bright);
+}
+
+.auth-brand-body {
+  position: relative;
+  max-width: 30ch;
+}
+
+.auth-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  font-weight: 500;
+  margin: var(--space-6) 0 var(--space-4);
+}
+
+.auth-headline em {
+  font-style: italic;
+  color: var(--color-seal-bright);
+}
+
+.auth-subtext {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-paper-soft);
+  opacity: 0.8;
+}
+
+/* Signature element: an official-seal motif tied directly to the product's
+   verification feature (Sec. 20), not generic decoration - gentle
+   scale/opacity entrance suggests a stamp settling into place. */
+.auth-seal {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  margin-top: var(--space-8);
+  animation: seal-settle 0.6s var(--ease-standard) both;
+}
+
+@keyframes seal-settle {
+  from { opacity: 0; transform: scale(0.85) rotate(-6deg); }
+  to { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+
+.auth-card p.auth-lede {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  margin: 0 0 var(--space-8);
+}
+
+/*
+  .field / .btn-primary / .auth-error / .auth-success used to live here.
+  Phase 5e moved them to tokens.css - see that file's own note for why. This
+  isn't a rename (every class name below is unchanged) or a removal (every
+  rule still applies, just from a different file); it fixes a real gap where
+  15 Phase 5 admin JSPs already referenced these exact class names and got
+  nothing, because admin-head.jspf never linked auth.css. tokens.css is the
+  one stylesheet every page - auth and admin alike - already loads.
+*/
+
+.auth-footer-link {
+  margin-top: var(--space-6);
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  text-align: center;
+}
+
+.auth-footer-link a {
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 860px) {
+  .auth-shell {
+    flex-direction: column;
+  }
+  .auth-brand {
+    flex: 0 0 auto;
+    padding: var(--space-6);
+  }
+  .auth-brand-body {
+    max-width: none;
+  }
+  .auth-headline {
+    font-size: 1.5rem;
+    margin: var(--space-3) 0 var(--space-2);
+  }
+  .auth-subtext {
+    display: none;
+  }
+  .auth-seal {
+    display: none;
+  }
+  .auth-form-panel {
+    padding: var(--space-8) var(--space-6);
+  }
+}
+
+/*
+  Sec. 20's public verification page (/verify/result/{token}). Deliberately
+  simpler than .auth-shell's two-panel layout, not a smaller version of it:
+  a QR scan overwhelmingly lands here straight from a phone camera, not as
+  a considered "let me go to this site" decision the brand panel's copy is
+  written to support - so this is one centered card, full stop, and it is
+  the one page in this project that must look right at 375px wide before
+  it looks right at any other size, not the other way round.
+*/
+.verify-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-paper);
+  padding: var(--space-6);
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  box-shadow: var(--shadow-lifted);
+}
+
+.verify-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.verify-wordmark span {
+  color: var(--color-seal);
+}
+
+.verify-banner {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+}
+
+.verify-banner-valid {
+  background: #EAF3EE;
+  border: 1px solid var(--color-verified);
+}
+
+.verify-banner-invalid {
+  background: #FBEEEF;
+  border: 1px solid var(--color-danger);
+}
+
+.verify-banner-icon {
+  margin-bottom: var(--space-3);
+}
+
+.verify-banner-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-1);
+}
+
+.verify-banner-valid .verify-banner-title { color: var(--color-verified); }
+.verify-banner-invalid .verify-banner-title { color: var(--color-danger); }
+
+.verify-banner-subtext {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+  margin: 0;
+}
+
+.verify-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 0.9rem;
+}
+
+.verify-detail-row:last-child {
+  border-bottom: none;
+}
+
+.verify-detail-label {
+  color: var(--color-ink-soft);
+}
+
+.verify-detail-value {
+  font-weight: 600;
+  color: var(--color-ink);
+  text-align: right;
+}
+
+.verify-timestamp {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+}

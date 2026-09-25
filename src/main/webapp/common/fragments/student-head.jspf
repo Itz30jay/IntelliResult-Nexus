@@ -1,0 +1,103 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%--
+    Student counterpart to admin-head.jspf/teacher-head.jspf - this project's
+    first student-facing page of any kind (Phases 5-9 were entirely Admin/
+    Teacher). Same tokens.css + app-shell.css pair, confirmed still
+    role-agnostic rather than assumed: every selector this fragment uses
+    (.shell, .sidebar, .topbar, .panel...) was already generic before this
+    file existed, the same "convergence, not forced sharing" reasoning
+    teacher-foot.jspf's own comment already recorded for the Teacher case.
+    Sidebar nav links only what's actually built so far, not Sec. 17's full
+    eventual Student list in one speculative pass - Phase 10 added
+    Dashboard/Re-evaluation on that principle, and Phase 11 (My Results,
+    Performance Analysis) is the principle holding, not being reconsidered:
+    each link still arrives exactly when the phase behind it does. Phase 12
+    added Marksheet the same way; Phase 14 added Notifications (its own new
+    "Communication" group, matching admin-head.jspf's own naming for the
+    identical pairing, ready for Notices to join it whenever that phase
+    reaches Student). Sec. 69's remaining Student items (Notices, Profile)
+    get added identically - still a deliberate departure from
+    admin-head.jspf/teacher-head.jspf's own choice to pre-wire their entire
+    nav in one early phase, which made sense there because Phase 5's/6a's
+    own sibling phases were mere weeks of the same build away and already
+    scoped; Student's sibling phases are being built one at a time in real
+    time, not pre-planned as a batch.
+    Expects the including page to have already set pageTitle and,
+    optionally, pageSubtitle as request attributes before this include.
+--%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><c:out value="${pageTitle}"/> - IntelliResult Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/tokens.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-shell.css">
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<c:set var="currentPath" value="${pageContext.request.servletPath}"/>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">IntelliResult <span>Nexus</span></div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-group">
+                <a class="sidebar-link ${currentPath == '/student/dashboard' ? 'active' : ''}" href="${ctx}/student/dashboard">
+                    <span class="dot"></span>Dashboard
+                </a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">Results</div>
+                <a class="sidebar-link ${currentPath == '/student/results' ? 'active' : ''}" href="${ctx}/student/results"><span class="dot"></span>My Results</a>
+                <a class="sidebar-link ${currentPath == '/student/marksheet' ? 'active' : ''}" href="${ctx}/student/marksheet"><span class="dot"></span>Marksheet</a>
+                <a class="sidebar-link ${currentPath == '/student/analysis' ? 'active' : ''}" href="${ctx}/student/analysis"><span class="dot"></span>Performance Analysis</a>
+                <a class="sidebar-link ${currentPath == '/student/revaluation' ? 'active' : ''}" href="${ctx}/student/revaluation"><span class="dot"></span>Re-evaluation</a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">Communication</div>
+                <a class="sidebar-link ${currentPath == '/student/notifications' ? 'active' : ''}" href="${ctx}/student/notifications">
+                    <span class="dot"></span>Notifications
+                    <c:if test="${not empty unreadNotificationCount and unreadNotificationCount > 0}">
+                        <span class="nav-badge">${unreadNotificationCount}</span>
+                    </c:if>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user-name"><c:out value="${sessionScope.sessionUserName}"/></div>
+            <div class="sidebar-user-role"><c:out value="${sessionScope.sessionUserRole}"/></div>
+            <form method="post" action="${ctx}/logout">
+                <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                <button type="submit" class="sidebar-footer-link">Sign out</button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="content">
+        <header class="topbar">
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+                <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"
+                        aria-label="Toggle navigation menu" aria-controls="sidebar" aria-expanded="false">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="topbar-title"><c:out value="${pageTitle}"/></h1>
+                    <c:if test="${not empty pageSubtitle}">
+                        <p class="topbar-subtitle"><c:out value="${pageSubtitle}"/></p>
+                    </c:if>
+                </div>
+            </div>
+            <a href="${ctx}/change-password" style="font-size:0.85rem;color:var(--color-ink-soft);text-decoration:none;">Change password</a>
+        </header>
+        <main class="page-body" id="main-content">

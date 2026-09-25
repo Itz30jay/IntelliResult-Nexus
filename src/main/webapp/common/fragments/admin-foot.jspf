@@ -1,0 +1,93 @@
+        </main>
+    </div>
+</div>
+
+<%--
+    Sec. 45's "clear feedback" for actions that redirect rather than
+    forward (ResultApprovalServlet's publish/lock/bulk-publish/bulk-lock,
+    AdminRevaluationServlet's resolve, NotificationServlet) - these set
+    sessionScope.flashSuccess/flashError before sendRedirect() specifically
+    because a redirect starts a brand-new request that request-scope
+    attributes cannot survive. Rendered here, once, in the fragment every
+    admin page already includes, rather than each of those servlets'
+    target pages remembering to check for it individually - this is
+    exactly the gap that meant none of them actually showed anything
+    before this fragment existed.
+    Passed through a hidden element's data-attribute (c:out's normal HTML
+    escaping) rather than interpolated directly into a script's source
+    text - a message containing an apostrophe (an exam or notice title,
+    say) would otherwise break out of a single-quoted JS string literal.
+    c:remove clears each one immediately after reading so it never
+    reappears on the next page navigation.
+--%>
+<c:if test="${not empty sessionScope.flashSuccess}">
+    <div id="flashSuccessData" data-message="<c:out value='${sessionScope.flashSuccess}'/>" style="display:none;"></div>
+    <c:remove var="flashSuccess" scope="session"/>
+</c:if>
+<c:if test="${not empty sessionScope.flashError}">
+    <div id="flashErrorData" data-message="<c:out value='${sessionScope.flashError}'/>" style="display:none;"></div>
+    <c:remove var="flashError" scope="session"/>
+</c:if>
+
+<%-- Shared JS for every admin page: jQuery+DataTables (Sec. 6/44 tables),
+     Chart.js (Sec. 5 dashboard charts), SweetAlert2 (Sec. 22 confirmation
+     dialogs), Toastr (Sec. 45 success/error feedback). Loaded once here
+     rather than per-page so a page that needs DataTables doesn't have to
+     remember the right CDN URLs, and one that doesn't just leaves the
+     library unused - the cost of an unused CDN script tag is negligible
+     next to the cost of every future admin page re-declaring this list. --%>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.8/js/dataTables.responsive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/js/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.8/css/responsive.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/css/toastr.min.css">
+
+<script>
+  // Mobile sidebar toggle - no dedicated button wired yet since this
+  // ships with the shell before any page needs it, but the class and
+  // logic exist now so the first page that adds a toggle button (Phase
+  // 5b) doesn't have to touch this shared fragment to get it.
+  // Sec. 44's "Responsive layout" - one global default rather than adding
+  // { responsive: true } to every individual page's own .DataTable() call.
+  // Safe regardless of source order: each page's own call sits inside
+  // $(document).ready(...), which never fires until the whole document -
+  // including this later script tag - has already parsed and run.
+  $.fn.dataTable.defaults.responsive = true;
+
+  // Sec. 42/45's "Loading states" / "clear feedback" - one global handler
+  // rather than editing every form across the app individually. Listens
+  // in the bubble phase (the default), so it always runs AFTER a page's
+  // own submit handler attached directly to that form (e.g.
+  // student-import.jsp's course-required check) - checking
+  // e.defaultPrevented means a validation failure that legitimately
+  // blocks submission is never mistaken for a real, in-flight request.
+  document.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) { return; }
+    var submitBtn = e.target.querySelector('button[type="submit"]:not([disabled])');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Processing\u2026';
+    }
+  });
+
+  function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var isOpen = sidebar.classList.toggle('open');
+    var btn = document.querySelector('.mobile-menu-btn');
+    if (btn) { btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); }
+  }
+
+  (function () {
+    var successEl = document.getElementById('flashSuccessData');
+    if (successEl) { toastr.success(successEl.dataset.message); }
+    var errorEl = document.getElementById('flashErrorData');
+    if (errorEl) { toastr.error(errorEl.dataset.message); }
+  })();
+</script>
+</body>
+</html>

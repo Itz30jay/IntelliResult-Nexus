@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.intelliresult</groupId>
+    <artifactId>intelliresult-nexus</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>IntelliResult Nexus</name>
+    <description>Intelligent Academic Result, Performance Analytics and Verification ERP</description>
+
+    <!--
+        DEPENDENCY VERSION POLICY
+        Every version below was verified against the live Maven Central / project
+        release pages on 2026-08-16, not recalled from training data. Several of
+        these moved past what a pre-2026 knowledge base would assume:
+          - Hibernate ORM is on the 7.4 stable series (6.x is now limited-support).
+          - Tomcat 11 / Jakarta EE 11 (Servlet 6.1) is the current target; Tomcat 9's
+            javax.* namespace is not used anywhere in this codebase.
+          - MySQL Connector/J moved to a 26.x release line.
+          - HikariCP is on 7.x, Sentry Java SDK on 8.x.
+        Re-verify against Maven Central before a production release, since this
+        sandbox has no outbound network access to Maven Central to auto-check.
+    -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- Jakarta EE 11 platform (Tomcat 11.0.x target) -->
+        <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
+        <jstl.api.version>3.0.0</jstl.api.version>
+        <jstl.impl.version>3.0.1</jstl.impl.version>
+
+        <!-- Persistence -->
+        <hibernate.version>7.4.5.Final</hibernate.version>
+        <mysql.connector.version>26.7.0</mysql.connector.version>
+        <hikaricp.version>7.1.0</hikaricp.version>
+
+        <!-- Security -->
+        <jbcrypt.version>0.4</jbcrypt.version>
+
+        <!-- Logging -->
+        <log4j.version>2.26.0</log4j.version>
+
+        <!-- Document / data processing -->
+        <poi.version>5.5.1</poi.version>
+        <openpdf.version>2.2.5</openpdf.version>
+        <zxing.version>3.5.4</zxing.version>
+
+        <!-- Error tracking -->
+        <sentry.version>8.28.0</sentry.version>
+
+        <!-- Mail -->
+        <jakarta.mail.api.version>2.1.5</jakarta.mail.api.version>
+        <angus.mail.version>2.0.3</angus.mail.version>
+
+        <!-- Misc -->
+        <jackson.version>2.18.2</jackson.version>
+
+        <!-- Testing -->
+        <junit.version>5.11.3</junit.version>
+        <mockito.version>5.14.2</mockito.version>
+        <h2.version>2.3.232</h2.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- ================= JAKARTA EE 11 PLATFORM (provided by Tomcat 11) ================= -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>${jstl.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>${jstl.impl.version}</version>
+        </dependency>
+
+        <!-- ================= PERSISTENCE: HIBERNATE 7 + MYSQL 8 + HIKARICP ================= -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikaricp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.connector.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <!-- X DevAPI / protobuf is only needed for MySQL document-store (NoSQL)
+                     access, which this relational ERP never uses. Excluding it keeps
+                     the WAR smaller and avoids an unused transitive dependency. -->
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ================= SECURITY ================= -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${jbcrypt.version}</version>
+        </dependency>
+
+        <!-- ================= LOGGING: LOG4J2 (+ SLF4J bridge for Hibernate/POI) ================= -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <!-- ================= EXCEL IMPORT/EXPORT (Phase 13) ================= -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+
+        <!-- ================= PDF MARKSHEETS (Phase 12) =================
+             Spec allows "iText 5 or fully compatible library". iText 5.x is AGPL-only
+             (see Phase 1 tech-decision notes) which is unsuitable for an institution to
+             deploy or a student to publish on GitHub without a commercial license.
+             OpenPDF is the LGPL/MPL-licensed, actively-maintained continuation of the
+             same iText 4/5 API lineage - functionally equivalent, legally simpler. -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
+
+        <!-- ================= QR VERIFICATION (Phase 12) ================= -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>${zxing.version}</version>
+        </dependency>
+
+        <!-- ================= ERROR TRACKING & PERFORMANCE MONITORING (all phases) ================= -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-log4j2</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+
+        <!-- ================= EMAIL NOTIFICATIONS (Phase 14) ================= -->
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>${jakarta.mail.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>${angus.mail.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ================= JSON (AJAX endpoints: notifications, DataTables server-side) ================= -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- ================= TESTING (Phase 17, wired now so Phase 3 DAOs are testable immediately) ================= -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- In-memory DB so DAO/Hibernate integration tests never need a live MySQL instance -->
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>intelliresult-nexus</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnMissingWebXml>true</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.1</version>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+

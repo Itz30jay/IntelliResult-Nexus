@@ -1,0 +1,772 @@
+/* Admin interior shell: fixed sidebar + scrollable content area. Sidebar
+   uses the same navy as the login brand panel so the two feel like one
+   product, not a marketing page bolted onto a different-looking app. */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-paper);
+}
+
+.sidebar {
+  flex: 0 0 260px;
+  background: linear-gradient(175deg, #131e33 0%, var(--color-ink) 55%);
+  color: var(--color-paper-soft);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lifted);
+  z-index: 5;
+}
+
+.sidebar-brand {
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-rule-dark);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sidebar-brand::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-seal-bright);
+  box-shadow: 0 0 0 3px rgba(212, 172, 118, 0.22);
+  flex-shrink: 0;
+}
+
+.sidebar-brand span {
+  color: var(--color-seal-bright);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-3);
+}
+
+.sidebar-group {
+  margin-bottom: var(--space-6);
+}
+
+.sidebar-group-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(247, 247, 245, 0.45);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.55rem var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-paper-soft);
+  text-decoration: none;
+  font-size: 0.88rem;
+  position: relative;
+  transition: background 0.15s var(--ease-standard), color 0.15s var(--ease-standard), padding-left 0.15s var(--ease-standard);
+}
+
+.sidebar-link:hover {
+  background: rgba(247, 247, 245, 0.08);
+}
+
+.sidebar-link.active {
+  background: rgba(212, 172, 118, 0.14);
+  color: var(--color-seal-bright);
+  font-weight: 600;
+  padding-left: calc(var(--space-3) + 4px);
+}
+
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--color-seal-bright);
+  border-radius: 0 3px 3px 0;
+}
+
+.sidebar-link .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* Sec. 23's notification badge - pushed to the end of the flex row via
+   margin-left:auto rather than its own layout, so it sits flush right
+   regardless of label length without needing a wrapping element. */
+.sidebar-link .nav-badge {
+  margin-left: auto;
+  background: var(--color-seal);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.sidebar-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-rule-dark);
+  font-size: 0.82rem;
+}
+
+.sidebar-user-name {
+  font-weight: 600;
+  color: var(--color-paper);
+}
+
+.sidebar-user-role {
+  color: rgba(247, 247, 245, 0.55);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-footer form {
+  margin-top: var(--space-3);
+}
+
+.sidebar-footer-link {
+  background: none;
+  border: none;
+  color: rgba(247, 247, 245, 0.7);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sidebar-footer-link:hover {
+  color: var(--color-paper);
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-8);
+  background: #fff;
+  border-bottom: 1px solid var(--color-rule);
+  box-shadow: 0 1px 0 rgba(16, 25, 43, 0.02), 0 4px 12px -8px rgba(16, 25, 43, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.topbar-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  margin: 2px 0 0;
+}
+
+.page-body {
+  padding: var(--space-8);
+}
+
+/* Stat cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+/* The thin seal-colored top rule (not a border-all-round) is this app's one
+   recurring "this is an official figure" signature - used on stat-cards and
+   panels alike so the eye learns it once and reads it everywhere, rather
+   than each surface inventing its own framing device. */
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-top: 3px solid var(--color-seal);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-rest);
+  transition: box-shadow 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-lifted);
+  transform: translateY(-2px);
+}
+
+.stat-card .label {
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card .value {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 500;
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.stat-card .value.accent { color: var(--color-seal); }
+.stat-card .value.warn { color: var(--color-danger); }
+.stat-card .value.ok { color: var(--color-verified); }
+
+/* Panels (charts, tables, lists) */
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-rest);
+}
+
+.panel h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.panel-empty {
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+  color: var(--color-ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.panel-empty::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--space-4);
+  border: 1.5px dashed var(--color-rule);
+  border-radius: 50%;
+}
+
+.chart-container {
+  position: relative;
+  height: 260px;
+}
+
+/*
+  DataTables override (Sec. 6/44's sortable/searchable tables). Every list,
+  roster, and results page in this app renders through jQuery DataTables,
+  loaded from its CDN default stylesheet with nothing overriding it - which
+  means the single most-viewed content type in the entire product (student
+  rosters, results, exam lists) was rendering in a bare jQuery-plugin
+  theme, completely disconnected from the navy/paper/brass identity
+  everywhere else. This is that override: a dark ink header (the same
+  surface color as the sidebar, so a table reads as authoritative rather
+  than a spreadsheet import), tabular-figure alignment for anything
+  numeric, and controls (search/length/pagination) restyled to match
+  .field/.btn-secondary rather than DataTables' own default inputs/buttons.
+*/
+table.dataTable {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  font-size: 0.88rem;
+}
+
+table.dataTable thead th,
+table.dataTable thead td {
+  background: var(--color-ink);
+  color: var(--color-paper-soft);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.85rem var(--space-4) !important;
+  border: none !important;
+  text-align: left;
+}
+
+table.dataTable thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+table.dataTable thead th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+
+/* DataTables draws its own sort carets via ::before/::after on
+   th.sorting/.sorting_asc/.sorting_desc - recoloring only those (not the
+   whole header) is what lets the caret dim to match the dark header
+   instead of showing the plugin's default near-invisible grey-on-grey. */
+table.dataTable thead th.sorting::before,
+table.dataTable thead th.sorting::after,
+table.dataTable thead th.sorting_asc::after,
+table.dataTable thead th.sorting_desc::after {
+  color: var(--color-seal-bright) !important;
+  opacity: 0.85;
+}
+
+table.dataTable tbody td {
+  padding: 0.75rem var(--space-4) !important;
+  border-bottom: 1px solid var(--color-rule) !important;
+  background: #fff;
+  vertical-align: middle;
+}
+
+table.dataTable tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+table.dataTable tbody tr:hover td {
+  background: #FBFAF7;
+}
+
+table.dataTable.stripe tbody tr.odd td,
+table.dataTable tbody tr:nth-child(even) td {
+  background: var(--color-paper);
+}
+
+table.dataTable.stripe tbody tr.odd:hover td,
+table.dataTable tbody tr:nth-child(even):hover td {
+  background: #F1EFE9;
+}
+
+/* Numeric-looking columns (marks, ranks, percentages, dates) get the same
+   tabular-figure treatment .stat-card/.list-row already use - a table
+   mixing proportional and tabular digits in the same view is one of the
+   fastest ways for a data table to look accidental rather than designed. */
+table.dataTable tbody td code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--color-paper-soft);
+  padding: 0.1em 0.45em;
+  border-radius: 4px;
+}
+
+.dataTables_wrapper {
+  padding-top: var(--space-2);
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  margin-left: var(--space-2);
+  padding: 0.45rem var(--space-3);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 2px rgba(16, 25, 43, 0.04);
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+  outline: none;
+  border-color: var(--color-seal);
+  box-shadow: inset 0 1px 2px rgba(16, 25, 43, 0.04), 0 0 0 3px rgba(184, 146, 90, 0.15);
+}
+
+.dataTables_wrapper .dataTables_length select {
+  padding: 0.35rem 1.6rem 0.35rem 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background-color: #fff;
+}
+
+.dataTables_wrapper .dataTables_info {
+  color: var(--color-ink-soft);
+  font-size: 0.8rem;
+  padding-top: var(--space-4) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  padding-top: var(--space-3) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem !important;
+  margin-left: 2px;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--color-ink) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--color-paper-soft) !important;
+  border: 1px solid transparent !important;
+  color: var(--color-ink) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--color-ink) !important;
+  color: var(--color-paper) !important;
+  border: 1px solid var(--color-ink) !important;
+  font-weight: 600;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+  opacity: 0.35;
+}
+
+/* Sec. 43's responsive tables - DataTables' own Responsive extension
+   already loaded; this just makes its "expand row for hidden columns"
+   control match the rest of the design instead of its default blue dot. */
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before {
+  background: var(--color-seal) !important;
+  box-shadow: none !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+/* First-run onboarding checklist (admin/dashboard.jsp) - a numbered
+   sequence with real dependency order behind it (Course before Semester,
+   Semester before Section/Subject), so this uses actual <ol> numbering
+   rather than decorative circular badges with no real sequence meaning. */
+.onboarding-steps {
+  list-style: none;
+  counter-reset: onboarding;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.onboarding-steps li {
+  counter-increment: onboarding;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.onboarding-steps li:last-child {
+  border-bottom: none;
+}
+
+.onboarding-steps li::before {
+  content: counter(onboarding);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-steps a {
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.onboarding-steps a:hover {
+  color: var(--color-seal);
+  text-decoration: underline;
+}
+
+.onboarding-steps span {
+  color: var(--color-ink-soft);
+  font-size: 0.85rem;
+}
+
+.onboarding-steps code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--color-paper-soft);
+  padding: 0.05em 0.4em;
+  border-radius: 4px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 0.85rem;
+}
+
+.timeline-item:last-child { border-bottom: none; }
+
+.timeline-action {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.timeline-meta {
+  color: var(--color-ink-soft);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+/* Simple list rows (top performers, notices) */
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 0.88rem;
+}
+
+.list-row:last-child { border-bottom: none; }
+
+.list-row .rank {
+  font-family: var(--font-mono);
+  color: var(--color-seal);
+  font-weight: 600;
+  margin-right: var(--space-3);
+}
+
+.list-row .metric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Plain (non-DataTables-enhanced) tables - the expandable per-student mark
+   breakdown on admin/results.jsp, small inline summary tables, and any
+   other table that doesn't need sorting/search/pagination. Deliberately a
+   lighter treatment than table.dataTable's dark header (a table nested
+   inside an already-elevated .panel doesn't need a second heavy header on
+   top of it), but still tabular-figure-aware and using the same rule/hover
+   language so it doesn't read as a different, unstyled component. */
+table:not(.dataTable) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+table:not(.dataTable) th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-soft);
+  padding: 0.6rem var(--space-3);
+  border-bottom: 2px solid var(--color-rule);
+}
+
+table:not(.dataTable) td {
+  padding: 0.6rem var(--space-3);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+table:not(.dataTable) tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table:not(.dataTable) tbody tr:hover td {
+  background: var(--color-paper);
+}
+
+.badge-priority-high, .badge-priority-urgent { background: #FBEEEF; color: var(--color-danger); }
+.badge-priority-normal { background: var(--color-paper-soft); color: var(--color-ink-soft); }
+.badge-priority-low { background: #EAF3EE; color: var(--color-verified); }
+
+/* Sec. 9/10's workflow-status badges. Restrained to the three tint families
+   .badge-priority-* already established (neutral/brass/verified) rather
+   than inventing a wider palette per status - CREATED hasn't started yet
+   (neutral); SCHEDULED/SUBMISSION/APPROVAL are the three "admin attention
+   in the brass zone" stages a person is actively moving through; ACTIVE/
+   PUBLISHED are both "live and correct" (verified green); LOCKED is the one
+   status worth a visually heavier treatment, since Sec. 10 describes it as
+   immutable under normal operations - solid ink, not a tint. Class names
+   are lowercase exam-status enum values on purpose (badge-status- +
+   fn:toLowerCase(status)) so a JSP never needs a c:choose to pick one. */
+.badge-status { text-transform: uppercase; letter-spacing: 0.03em; }
+.badge-status-created, .badge-status-draft, .badge-status-pending { background: var(--color-paper-soft); color: var(--color-ink-soft); }
+.badge-status-scheduled, .badge-status-submission, .badge-status-approval, .badge-status-submitted, .badge-status-approved { background: #F6EFE3; color: var(--color-seal); }
+.badge-status-active, .badge-status-published, .badge-status-assigned { background: #EAF3EE; color: var(--color-verified); }
+.badge-status-locked { background: var(--color-ink); color: var(--color-paper); }
+/* Upgrade addition: Registration/Forgot-Password's admin queues and
+   Re-evaluation share the PENDING/APPROVED/REJECTED vocabulary already
+   used for exam-adjacent statuses above, but this codebase's original
+   badge-status rules never defined a REJECTED/DECLINED tone - reusing
+   badge-priority-high's own danger pairing (#FBEEEF / --color-danger)
+   keeps "this needs a different kind of attention" visually distinct from
+   the neutral PENDING tone and the positive APPROVED tone. */
+.badge-status-rejected, .badge-status-declined { background: #FBEEEF; color: var(--color-danger); }
+
+/* Horizontal lifecycle stepper (Sec. 9's "display workflow status
+   visually"). Each .stepper-step draws its own connector as a ::after line
+   running from its own center across its own flex-basis width - a classic
+   equal-width-flex-item technique that needs no JS and no percentage math
+   tied to which step is "current," unlike a single continuous fill bar
+   would. The line color for the segment leaving step N reflects whether N
+   itself is done, so "done" visually means "and the path out of it too." */
+.stepper {
+  display: flex;
+  margin-bottom: var(--space-6);
+}
+
+.stepper-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  font-size: 0.68rem;
+  color: var(--color-ink-soft);
+  padding-top: var(--space-2);
+}
+
+.stepper-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-2) + 7px);
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-rule);
+  z-index: 0;
+}
+
+.stepper-step.done:not(:last-child)::after {
+  background: var(--color-seal);
+}
+
+.stepper-dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color-rule);
+  margin: 0 auto var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+.stepper-step.done .stepper-dot {
+  background: var(--color-seal);
+  border-color: var(--color-seal);
+}
+
+.stepper-step.current .stepper-dot {
+  background: var(--color-verified);
+  border-color: var(--color-verified);
+  box-shadow: 0 0 0 4px #EAF3EE;
+}
+
+.stepper-step.current {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* Sec. 29's marks-entry grid: compact numeric inputs, a live per-row total
+   (JS-computed, never persisted - see MarksEntryService's own class
+   Javadoc for why), and a visibly distinct treatment for rows Sec. 10
+   already closed off to editing (SUBMITTED or later). */
+.marks-input {
+  width: 84px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.marks-input:focus {
+  border-color: var(--color-seal);
+}
+
+.marks-input:disabled {
+  background: var(--color-paper-soft);
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+
+.marks-row-readonly {
+  background: var(--color-paper-soft);
+}
+
+.live-total {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* Sec. 43's "navigation collapses" - the button that actually opens the
+   sidebar the media query below hides. toggleSidebar() has existed since
+   this fragment was first written; nothing ever called it until Phase 16
+   found that a screen narrower than 960px had a sidebar with no way to
+   reopen it once collapsed. */
+.mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.mobile-menu-btn:hover {
+  background: var(--color-paper-soft);
+}
+
+@media (max-width: 960px) {
+  .sidebar { position: fixed; left: -260px; z-index: 20; transition: left 0.2s var(--ease-standard); }
+  .sidebar.open { left: 0; }
+  .page-body { padding: var(--space-4); }
+  .topbar { padding: var(--space-3) var(--space-4); }
+  .mobile-menu-btn { display: inline-flex; }
+}

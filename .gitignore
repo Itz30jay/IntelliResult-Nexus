@@ -1,0 +1,9 @@
+﻿target/
+*.class
+.idea/
+*.iml
+.vscode/
+*.log
+.env
+import-*.sql
+logs/

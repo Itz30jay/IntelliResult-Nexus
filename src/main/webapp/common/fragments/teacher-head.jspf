@@ -1,0 +1,100 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%--
+    Teacher counterpart to admin-head.jspf - same static-include reasoning
+    (needs the including page's own request attributes, particularly which
+    nav link is "active"), same tokens.css + app-shell.css pair. app-shell.css
+    was renamed from admin-shell.css in this phase specifically so this
+    fragment linking it isn't a lie: every selector inside (.shell, .sidebar,
+    .topbar, .stat-card, .panel...) was already role-agnostic, just filed
+    under a name that assumed only Admin would ever use it.
+    Sidebar nav is Sec. 69's full Teacher list, including two links
+    (Student Performance, Re-evaluations) with no route behind them yet -
+    same "pre-wire the whole nav, not just what's built so far" choice
+    admin-head.jspf made from Phase 5a onward (see NavigationUtil's own note
+    on why that's an honest "not built yet," not a bug).
+    Expects the including page to have already set pageTitle and, optionally,
+    pageSubtitle as request attributes before this include.
+--%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><c:out value="${pageTitle}"/> - IntelliResult Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/tokens.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-shell.css">
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<c:set var="currentPath" value="${pageContext.request.servletPath}"/>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">IntelliResult <span>Nexus</span></div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-group">
+                <a class="sidebar-link ${currentPath == '/teacher/dashboard' ? 'active' : ''}" href="${ctx}/teacher/dashboard">
+                    <span class="dot"></span>Dashboard
+                </a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">My Teaching</div>
+                <a class="sidebar-link ${currentPath == '/teacher/my-classes' ? 'active' : ''}" href="${ctx}/teacher/my-classes"><span class="dot"></span>My Classes</a>
+                <a class="sidebar-link ${currentPath == '/teacher/my-subjects' ? 'active' : ''}" href="${ctx}/teacher/my-subjects"><span class="dot"></span>My Subjects</a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">Examinations</div>
+                <a class="sidebar-link ${currentPath == '/teacher/exams' ? 'active' : ''}" href="${ctx}/teacher/exams"><span class="dot"></span>Exams</a>
+                <a class="sidebar-link ${currentPath == '/teacher/marks-entry' ? 'active' : ''}" href="${ctx}/teacher/marks-entry"><span class="dot"></span>Marks Entry</a>
+                <a class="sidebar-link ${currentPath == '/teacher/draft-results' ? 'active' : ''}" href="${ctx}/teacher/draft-results"><span class="dot"></span>Draft Results</a>
+                <a class="sidebar-link ${currentPath == '/teacher/submitted-results' ? 'active' : ''}" href="${ctx}/teacher/submitted-results"><span class="dot"></span>Submitted Results</a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">Insights</div>
+                <a class="sidebar-link ${currentPath == '/teacher/student-performance' ? 'active' : ''}" href="${ctx}/teacher/student-performance"><span class="dot"></span>Student Performance</a>
+                <a class="sidebar-link ${currentPath == '/teacher/revaluations' ? 'active' : ''}" href="${ctx}/teacher/revaluations"><span class="dot"></span>Re-evaluations</a>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">Activity</div>
+                <a class="sidebar-link ${currentPath == '/teacher/activity' ? 'active' : ''}" href="${ctx}/teacher/activity"><span class="dot"></span>My Activity</a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user-name"><c:out value="${sessionScope.sessionUserName}"/></div>
+            <div class="sidebar-user-role"><c:out value="${sessionScope.sessionUserRole}"/></div>
+            <form method="post" action="${ctx}/logout">
+                <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                <button type="submit" class="sidebar-footer-link">Sign out</button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="content">
+        <header class="topbar">
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+                <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"
+                        aria-label="Toggle navigation menu" aria-controls="sidebar" aria-expanded="false">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <div>
+                    <h1 class="topbar-title"><c:out value="${pageTitle}"/></h1>
+                    <c:if test="${not empty pageSubtitle}">
+                        <p class="topbar-subtitle"><c:out value="${pageSubtitle}"/></p>
+                    </c:if>
+                </div>
+            </div>
+            <a href="${ctx}/change-password" style="font-size:0.85rem;color:var(--color-ink-soft);text-decoration:none;">Change password</a>
+        </header>
+        <main class="page-body" id="main-content">

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    status="warn": Log4j2's own internal startup diagnostics are suppressed
+    unless something is actually wrong with this config file, keeping
+    container startup logs readable.
+-->
+<Configuration status="warn" monitorInterval="60">
+
+    <Properties>
+        <!-- ${sys:...} lets the log directory be overridden per-environment
+             without editing this file (e.g. -Dintelliresult.log.dir=/var/log/intelliresult). -->
+        <Property name="LOG_DIR">${sys:intelliresult.log.dir:-logs}</Property>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n%throwable
+        </Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Console: every servlet-container / container-platform (Docker, systemd)
+             captures stdout by default, so this is the primary appender for
+             live tailing during development and in most deployment targets. -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- RollingFile: durable on-disk history for traditional VM/on-prem
+             deployments where container log aggregation isn't in play.
+             Size-based rollover keeps any single file manageable; the 30-file
+             cap bounds total disk usage for a long-running server. -->
+        <RollingFile name="RollingFile"
+                     fileName="${LOG_DIR}/intelliresult-nexus.log"
+                     filePattern="${LOG_DIR}/intelliresult-nexus-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Sentry: automatic capture layer. Anything logged at ERROR or above
+             anywhere in the app becomes a Sentry event with no extra code;
+             INFO+ becomes a breadcrumb trail leading up to that event.
+             This complements (does not replace) the manual
+             Sentry.captureException(e, scope -> {...}) calls services make for
+             business exceptions that need rich tags (module, action, entity id). -->
+        <Sentry name="Sentry"
+                minimumBreadcrumbLevel="INFO"
+                minimumEventLevel="ERROR"/>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Application code: verbose by default so Phase 2 onward is easy to
+             debug locally. Tighten to INFO for a shared staging environment via
+             the log4j2.xml override mechanism (monitorInterval reloads this
+             file automatically) rather than a redeploy. -->
+        <Logger name="com.intelliresult.nexus" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Sentry"/>
+        </Logger>
+
+        <!-- Generated SQL, visible on demand. Left at INFO (i.e. effectively
+             silent, since Hibernate logs SQL at DEBUG) by default; a developer
+             debugging a query flips this one logger to DEBUG locally. -->
+        <Logger name="org.hibernate.SQL" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+
+        <!-- Deliberately NOT set to DEBUG: this logger prints bound statement
+             parameter VALUES, which for this application means real student
+             names, marks, and emails. Pinning it to WARN prevents someone from
+             casually bumping org.hibernate.SQL to DEBUG for query troubleshooting
+             and unintentionally writing student PII into a log file
+             (Sec. 4 / Sec. 41 of the project spec: never log private data). -->
+        <Logger name="org.hibernate.orm.jdbc.bind" level="WARN" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Sentry"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

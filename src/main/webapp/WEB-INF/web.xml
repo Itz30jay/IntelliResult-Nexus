@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                              https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
+         version="6.1">
+
+    <display-name>IntelliResult Nexus</display-name>
+
+    <!--
+        Servlets and listeners are intentionally NOT declared here -
+        @WebServlet/@WebListener keep each one's routing next to its code.
+        Filters ARE declared here, explicitly, which is a deliberate
+        exception to that rule: the Servlet specification does not guarantee
+        any particular execution order for annotation-scanned filters, but
+        this chain's correctness depends entirely on running in this exact
+        order:
+          1. HibernateSessionFilter - binds a Session so anything below can query the DB
+          2. AuthenticationFilter    - resolves and re-validates the session user
+          3. AuthorizationFilter     - checks that user's role against the URL (needs #2's result)
+          4. CsrfFilter              - validates state-changing requests last, once auth is settled
+        <filter-mapping> declaration order is the one ordering guarantee the
+        Servlet spec actually makes, which is why these four - and only
+        these four, where order is genuinely correctness-critical - live
+        here instead of as @WebFilter annotations.
+    -->
+    <filter>
+        <filter-name>HibernateSessionFilter</filter-name>
+        <filter-class>com.intelliresult.nexus.filter.HibernateSessionFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>com.intelliresult.nexus.filter.AuthenticationFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>AuthorizationFilter</filter-name>
+        <filter-class>com.intelliresult.nexus.filter.AuthorizationFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>CsrfFilter</filter-name>
+        <filter-class>com.intelliresult.nexus.filter.CsrfFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>HibernateSessionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AuthorizationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CsrfFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <session-config>
+        <!-- Static fallback; AppConfig's app.session.timeoutMinutes is applied
+             programmatically per-session in the authentication flow (Phase 4)
+             so it can be tuned without editing this file. -->
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+            <!-- "secure" is enabled at the reverse-proxy/load-balancer level in
+                 production (Phase 18 deployment guide); forcing it here would
+                 break local plain-HTTP development. -->
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/common/error-404.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/common/access-denied.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/common/error-500.jsp</location>
+    </error-page>
+    <error-page>
+        <!-- Catches anything not already handled by a controller's own
+             try/catch, so an unexpected RuntimeException can never render a
+             raw stack trace to a user. -->
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/common/error-500.jsp</location>
+    </error-page>
+
+</web-app>

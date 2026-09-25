@@ -1,0 +1,308 @@
+/*
+  Design tokens for IntelliResult Nexus.
+
+  Palette grounds itself in the product's actual differentiator - verified,
+  auditable academic records - rather than a generic SaaS look: deep
+  authoritative navy + a brass "seal" accent evoke an official transcript or
+  certificate, not a dashboard. Deliberately NOT the two most common
+  AI-generated defaults (warm cream + terracotta serif; near-black + neon
+  accent) - navy/paper/brass is a different, more specific choice for a
+  product about verification and institutional trust.
+
+  Fraunces (display) has real character without being the generic
+  high-contrast serif that usually pairs with a cream background - used with
+  restraint (headings only). Inter carries the UI/form text, since login is
+  a task people want to complete fast, not admire. IBM Plex Mono renders
+  anything numeric/tabular (roll numbers, IDs, timestamps) with the tabular
+  precision of a real mark sheet.
+*/
+:root {
+  /* Color */
+  --color-ink: #10192B;
+  --color-ink-soft: #5B6472;
+  --color-paper: #F7F7F5;
+  --color-paper-soft: #E8E6DF;
+  --color-seal: #B8925A;
+  --color-seal-bright: #D4AC76;
+  --color-verified: #2F6B52;
+  --color-danger: #A3384A;
+  --color-rule: #DADEE3;
+  --color-rule-dark: rgba(247, 247, 245, 0.16);
+
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Spacing scale (rem, 4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+    Elevation: every shadow in this file is tinted from --color-ink rather
+    than a generic rgba(0,0,0,x) - the same navy used everywhere else, at
+    low opacity, so a raised surface reads as "lifted paper catching this
+    product's own ink tone" rather than the default grey drop-shadow every
+    component library ships. Two tiers only: -rest for anything static
+    (cards, panels, the table body), -lifted for whatever is actively being
+    interacted with (a hovered button, an open menu) - not a five-step
+    Material-style ramp, which would be more system than this app needs.
+  */
+  --shadow-rest: 0 1px 2px rgba(16, 25, 43, 0.06), 0 4px 16px -8px rgba(16, 25, 43, 0.12);
+  --shadow-lifted: 0 2px 4px rgba(16, 25, 43, 0.08), 0 12px 28px -10px rgba(16, 25, 43, 0.22);
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: local('Fraunces');
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One shared, visible focus style for every interactive element in the
+   project - Sec. 43/16 accessibility requirements start here, not bolted on
+   later. outline (not just box-shadow) so it survives forced-colors mode. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-seal);
+  outline-offset: 2px;
+}
+
+/*
+  Shared form/button primitives. Originally written only for auth.css
+  (Phase 4's login screen) but referenced by class name from every Phase 5
+  admin form (departments, courses, sections, subjects, exams, grading
+  rules...) long before they were ever loaded anywhere but the login page.
+  Moving them here - the one stylesheet every page in the app already
+  loads - is what actually makes those existing references resolve; see
+  auth.css's own note at the point they used to live for the full story.
+  .field select/.field textarea are a genuine addition, not a relocation:
+  the login form never had either, so nothing needed them styled before now.
+*/
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-2);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.65rem var(--space-3);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 2px rgba(16, 25, 43, 0.04);
+  transition: border-color 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard);
+}
+
+.field select {
+  cursor: pointer;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--color-seal);
+  box-shadow: inset 0 1px 2px rgba(16, 25, 43, 0.04), 0 0 0 3px rgba(184, 146, 90, 0.15);
+}
+
+.field input:hover:not(:focus),
+.field select:hover:not(:focus) {
+  border-color: #C7CDD6;
+}
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="number"],
+.field input[type="date"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Matches the inline style every Phase 5a-5d form repeats by hand for a
+   per-field validation message - extracted here for every new form (Phase
+   5e onward) to use instead of repeating it again; existing forms' inline
+   styles render identically and don't need to change to match. */
+.field-error {
+  color: var(--color-danger);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+  margin-top: 4px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem var(--space-4);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-paper);
+  background: var(--color-ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-rest);
+  transition: background 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard), transform 0.15s var(--ease-standard);
+}
+
+.btn-primary:hover {
+  background: #1c2a45;
+  box-shadow: var(--shadow-lifted);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-rest);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* A second action of comparable visual weight alongside a .btn-primary
+   (e.g. "Advance status" next to "Save changes") - outlined rather than
+   filled, so the primary action still reads as the one the page wants you
+   to take. New in Phase 5e: no earlier phase needed two buttons this
+   prominent side by side. */
+.btn-secondary {
+  width: 100%;
+  padding: 0.75rem var(--space-4);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease-standard), background 0.15s var(--ease-standard), box-shadow 0.15s var(--ease-standard);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-ink-soft);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-rest);
+}
+
+.auth-error {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-6);
+  background: #FBEEEF;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.auth-success {
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-6);
+  background: #EAF3EE;
+  border: 1px solid var(--color-verified);
+  border-radius: var(--radius-sm);
+  color: var(--color-verified);
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Sec. 43's "accessible" - a visible keyboard-focus ring on every
+   interactive element. :focus-visible (not a blanket :focus) so a mouse
+   click doesn't show the same ring a Tab keypress does - the ring is for
+   people navigating by keyboard, not everyone. */
+:focus-visible {
+  outline: 2px solid var(--color-seal);
+  outline-offset: 2px;
+}
+
+/* Sec. 43's "skip to main content" - visually hidden until it receives
+   keyboard focus (the first Tab press on any page), then placed on top
+   of everything else so a screen-reader or keyboard-only visitor never
+   has to tab through the entire sidebar just to reach the page content. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 var(--radius-sm) 0;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* Sec. 43's "Tables usable on small screens" - a wide table (the Class
+   Result Report's one-column-per-subject shape is the clearest example)
+   scrolls horizontally within its own box instead of forcing the whole
+   page wider than the viewport or truncating columns silently. */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

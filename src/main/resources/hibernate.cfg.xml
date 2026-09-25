@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+
+        <!--
+            NO connection.url / connection.username / connection.password here.
+            Those are secrets and environment-specific values, so HibernateUtil
+            injects them programmatically from AppConfig (env vars first, then
+            application.properties) before the SessionFactory is built. Keeping
+            them out of this static, source-controlled file is what makes it
+            safe to commit this file to Git.
+        -->
+
+        <!-- MySQLDialect auto-negotiates feature/version specifics against the
+             live JDBC connection, so a single dialect covers MySQL 8.0 and 8.4+
+             without pinning a version-specific dialect class. -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!-- "managed" is the current-session-context strategy meant for code that
+             explicitly binds/unbinds a Session to the current thread - exactly
+             what HibernateSessionFilter does at the start/end of every request
+             via ManagedSessionContext.bind()/unbind(). ("thread" would instead
+             auto-open a Session the first time something asks for one and rely
+             on implicit magic to manage it, which is harder to reason about than
+             a filter that owns the lifecycle explicitly.) Transaction boundaries
+             remain a separate, explicit concern owned by the Service layer -
+             see HibernateSessionFilter.java for why session lifecycle and
+             transaction lifecycle are deliberately not the same thing here. -->
+        <property name="hibernate.current_session_context_class">managed</property>
+
+        <!-- Short name resolved by Hibernate to HikariCPConnectionProvider.
+             Hibernate's own built-in pool is documented as unfit for production use;
+             HikariCP is the de-facto standard high-throughput JDBC pool. Pool sizing
+             properties (maximumPoolSize etc.) are also injected at runtime by
+             HibernateUtil so they can differ between dev/staging/production. -->
+        <property name="hibernate.connection.provider_class">hikaricp</property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!-- SQL is never written directly to stdout via Hibernate's own show_sql;
+             instead it is routed through the org.hibernate.SQL Log4j2 logger
+             (see log4j2.xml) so it can be filtered, redirected, and correlated
+             with the rest of the application's structured logs. -->
+        <property name="hibernate.show_sql">false</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hibernate.highlight_sql">false</property>
+
+        <!-- Schema ownership: "validate" is the production-safe default (the schema
+             is owned by the versioned SQL scripts delivered in Phase 2, and Hibernate
+             only checks that entity mappings agree with what's already there).
+             HibernateUtil allows overriding this to "update" via
+             db.schema.management for fast local iteration while entities are being
+             built out in Phase 3, before Phase 2's scripts are the enforced source
+             of truth. See HibernateUtil.java for how the override is applied. -->
+        <property name="hibernate.hbm2ddl.auto">validate</property>
+
+        <!-- Statistics are cheap to collect and feed Sentry performance spans /
+             future dashboard "slow query" insights (Phase 5 admin dashboard,
+             Phase 49-performance concerns) without adding a separate profiler. -->
+        <property name="hibernate.generate_statistics">false</property>
+
+        <!--
+            ENTITY MAPPINGS
+            Explicit per-class mappings (rather than package scanning) keep
+            the mapped model traceable in one place without pulling in an
+            extra classpath-scanning dependency. Listed in the same
+            dependency order as schema.sql for easy side-by-side comparison.
+        -->
+        <mapping class="com.intelliresult.nexus.entity.Department"/>
+        <mapping class="com.intelliresult.nexus.entity.Course"/>
+        <mapping class="com.intelliresult.nexus.entity.AcademicYear"/>
+        <mapping class="com.intelliresult.nexus.entity.Semester"/>
+        <mapping class="com.intelliresult.nexus.entity.Section"/>
+        <mapping class="com.intelliresult.nexus.entity.Subject"/>
+        <mapping class="com.intelliresult.nexus.entity.User"/>
+        <mapping class="com.intelliresult.nexus.entity.Student"/>
+        <mapping class="com.intelliresult.nexus.entity.Teacher"/>
+        <mapping class="com.intelliresult.nexus.entity.TeacherSubject"/>
+        <mapping class="com.intelliresult.nexus.entity.Exam"/>
+        <mapping class="com.intelliresult.nexus.entity.Result"/>
+        <mapping class="com.intelliresult.nexus.entity.ResultSummary"/>
+        <mapping class="com.intelliresult.nexus.entity.ResultHistory"/>
+        <mapping class="com.intelliresult.nexus.entity.RevaluationRequest"/>
+        <mapping class="com.intelliresult.nexus.entity.GradingRule"/>
+        <mapping class="com.intelliresult.nexus.entity.Notification"/>
+        <mapping class="com.intelliresult.nexus.entity.ActivityLog"/>
+        <mapping class="com.intelliresult.nexus.entity.Notice"/>
+        <mapping class="com.intelliresult.nexus.entity.SystemSetting"/>
+        <mapping class="com.intelliresult.nexus.entity.MarksheetVerification"/>
+        <mapping class="com.intelliresult.nexus.entity.RegistrationRequest"/>
+        <mapping class="com.intelliresult.nexus.entity.OtpCode"/>
+        <mapping class="com.intelliresult.nexus.entity.PasswordResetRequest"/>
+
+    </session-factory>
+</hibernate-configuration>
+
